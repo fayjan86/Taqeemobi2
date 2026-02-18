@@ -597,7 +597,7 @@ tr.r1{background:linear-gradient(90deg,#fee2e2 0,#fff 60%)} tr.r2{background:lin
     <div class="kbar"><div id="fill" class="kfill"></div></div>
     <div class="kline">
       <span id="kL">مؤشر الإنجاز: 0%</span>
-      <span id="kM">متوسط السُّلّم: 0.00 / 5</span>
+      <span id="kM">متوسط السُّلّم: 0.00 / 5</span>
       <span id="kR">مجموع الأوزان: 0%</span>
     </div>
   </div>
@@ -766,7 +766,7 @@ const HELP_TEXT = `
 <h4>✳️ أبرز المزايا:</h4>
 <ul>
   <li><b>تخطيط ذكي للأداء:</b> أهداف قابلة للقياس بمؤشرات وقيم مستهدفة من بنك أهداف مناسب لكل نموذج.</li>
-  <li><b>تحليل فوري ودقيق:</b> احتساب تلقائي للأوزان، ومتوسط السُّلّم، ومؤشر الإنجاز مع تلوين واضح لقراءة النتائج بسرعة.</li>
+  <li><b>تحليل فوري ودقيق:</b> احتساب تلقائي للأوزان، ومتوسط السُّلّم، ومؤشر الإنجاز مع تلوين واضح لقراءة النتائج بسرعة.</li>
   <li><b>عدسة بيانات:</b> استيراد أسماء المعلمين من Excel/CSV مع بحث سريع واختيار فوري.</li>
   <li><b>خطة تحسين فجوات الأداء:</b> توليد صفحة مستقلة لعناصر التحسين المقترحة بناءً على النتائج وشواهد المتابعة.</li>
   <li><b>كشف تقييم الأداء:</b> حفظ واسترجاع سجلات التقييم مع إبراز حالة “محفوظ” داخل العدسة.</li>
@@ -1432,13 +1432,13 @@ const BANK_IMPROVE={
 
 /* مستويات التقدير العام (لصف التقدير أسفل الجدول) */
 const GENERAL_LEVELS = [
-  { min: 4.5, max: 5.01, desc: "مثالي", label: "5", cls: "lv5" },
-  { min: 3.5, max: 4.5,  desc: "يتخطى التوقعات", label: "4", cls: "lv4" },
-  { min: 2.5, max: 3.5,  desc: "يوافق التوقعات", label: "3", cls: "lv3" },
-  { min: 1.5, max: 2.5,  desc: "بحاجة إلى تطوير", label: "2", cls: "lv2" },
-  { min: 0,   max: 1.5,  desc: "غير مرضي", label: "1", cls: "lv1" }
+  {min:90, max:100, desc:"مثالي", label:"5", cls:"lv5"},
+  {min:80, max:89.999, desc:"يتخطى التوقعات", label:"4", cls:"lv4"},
+  {min:70, max:79.999, desc:"يوافق التوقعات", label:"3", cls:"lv3"},
+  {min:60, max:69.999, desc:"بحاجة إلى تطوير", label:"2", cls:"lv2"},
+  {min:0,  max:59.999, desc:"غير مرضي", label:"1", cls:"lv1"}
 ];
-  
+
 /* تتبّع التحرير اليدوي */
 let editedStrengths=false, editedImproves=false;
 $('#strengths').addEventListener('input',()=>{editedStrengths=true; snap();});
@@ -1543,63 +1543,41 @@ function recalc(){
   $('#sum').textContent=total.toFixed(2); $('#avg').textContent=avg.toFixed(2);
   $('#fill').style.width=Math.min(100,total)+'%';
   $('#kL').textContent=`مؤشر الإنجاز: ${total.toFixed(0)}%`;
-  $('#kM').textContent=`متوسط السُّلّم: ${avg.toFixed(2)} / 5`;
+  $('#kM').textContent=`متوسط السُّلّم: ${avg.toFixed(2)} / 5`;
   $('#kR').textContent=`مجموع الأوزان: ${ws}%`;
   $('#sigT').textContent=$('#tName').value||'—';
 
-  function updateOverallLevel(total, avg, strengths, improves, editedStrengths, editedImproves) {
-
-  const pill = document.querySelector('#overallPill');
+  /* صف مستوى التقدير العام للأداء */
+  const pill = $('#overallPill');
   const clsList = ['lv1','lv2','lv3','lv4','lv5'];
+  clsList.forEach(c=>pill.classList.remove(c));
 
-  // إزالة جميع الكلاسات السابقة
-  clsList.forEach(c => pill.classList.remove(c));
+  let level = GENERAL_LEVELS.find(l=> total>=l.min && total<=l.max);
+  if(!level && total>0){ level = GENERAL_LEVELS[GENERAL_LEVELS.length-1]; }
 
-  // تحديد المستوى المناسب (من 0 - 5)
-  let level = GENERAL_LEVELS.find(l =>
-    total >= l.min && total < l.max
-  );
-
-  if (!level) {
-    level = GENERAL_LEVELS[GENERAL_LEVELS.length - 1];
-  }
-
-  if (level) {
+  if(level){
     pill.classList.add(level.cls);
-    document.querySelector('#overallClass').textContent = level.label;
-    document.querySelector('#overallDesc').textContent =
-      'مستوى التقدير العام للأداء — ' + level.desc;
-  } else {
-    document.querySelector('#overallClass').textContent = '—';
-    document.querySelector('#overallDesc').textContent =
-      'مستوى التقدير العام للأداء';
+    $('#overallClass').textContent = level.label;
+    $('#overallDesc').textContent  = 'مستوى التقدير العام للأداء — ' + level.desc;
+  }else{
+    $('#overallClass').textContent = '—';
+    $('#overallDesc').textContent  = 'مستوى التقدير العام للأداء';
   }
+  $('#overallPercent').textContent = 'الدرجة النسبية: ' + total.toFixed(0) + '%';
+  $('#overallAvg').textContent     = 'متوسط ' + avg.toFixed(2) + ' / 5';
 
-  // ✅ عرض الدرجة من 5 بدل النسبة
-  document.querySelector('#overallPercent').textContent =
-    'الدرجة: ' + total.toFixed(2) + ' / 5';
-
-  document.querySelector('#overallAvg').textContent =
-    'متوسط ' + avg.toFixed(2) + ' / 5';
-
-  // نقاط القوة
-  if (!editedStrengths) {
+  if(!editedStrengths){
     const s = joinSlashLine(strengths);
-    const el = document.querySelector('#strengths');
-    el.textContent = s || (cleanText(el.textContent) || '—');
+    $('#strengths').textContent = s || (cleanText($('#strengths').textContent)||'—');
   }
 
-  // فرص التحسين
-  const currentImp = cleanText(document.querySelector('#improves').textContent);
-  const sourceList = (editedImproves && currentImp && currentImp !== '—')
+  const currentImp = cleanText($('#improves').textContent);
+  const sourceList = (editedImproves && currentImp && currentImp!=='—')
     ? [currentImp, ...improves]
     : improves;
-
   const mergedImp = joinSlashLine(sourceList);
-  document.querySelector('#improves').textContent =
-    mergedImp || (currentImp || '—');
+  $('#improves').textContent = mergedImp || (currentImp || '—');
 }
-
 
 /* حفظ لقطة */
 function snap(){
