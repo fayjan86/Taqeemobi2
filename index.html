@@ -747,10 +747,6 @@ const K_PEOPLE='PF_people'; // عدسة الأسماء
   $('#editDir').onclick=()=>{const v=prompt('الإدارة التعليمية', $('#dirTxt').textContent.trim()); if(v!==null){$('#dirTxt').textContent=(v.trim()||'—'); localStorage.setItem(K_DIR,$('#dirTxt').textContent); snap();}};
 })();
 
-/* توقيع المدير */
-$('#sigP').textContent=localStorage.getItem(K_P)||$('#sigP').textContent;
-$('#sigP').onclick=()=>{const v=prompt('اسم مدير المدرسة', $('#sigP').textContent.trim()); if(v!==null){$('#sigP').textContent=(v.trim()||'—'); localStorage.setItem(K_P,$('#sigP').textContent); snap();}};
-
 /* محتوى الشرح — كما هو */
 const HELP_TEXT = `
 <p><b>🔹 نموذج تقييم الأداء الوظيفي</b> <span class="badge">إصدار تجريبي مساند</span></p>
